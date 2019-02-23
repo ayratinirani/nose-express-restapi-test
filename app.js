@@ -3,7 +3,7 @@ const morgan=require("morgan");
 const  app=express();
 const  bodyParser=require("body-parser");
 const  mongoose=require('mongoose');
-
+ mongoose.Promise=global.Promise;
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
