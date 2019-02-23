@@ -14,9 +14,9 @@ const productRoutes=require("./api/routes/products");
 app.use("/products",productRoutes);
 
 
-const productRoutes=require("./api/routes/orders");
+const ordersRoutes=require("./api/routes/orders");
 
-app.use("/orders",productRoutes);
+app.use("/orders",ordersRoutes);
 
 
 
