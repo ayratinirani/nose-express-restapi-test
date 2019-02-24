@@ -1,12 +1,35 @@
 const  express= require("express");
+
 const  router = express.Router();
 const mongoose=require("mongoose");
 const Product = require("../models/product");
+const  multer=require("multer");
+
+const storage=multer.diskStorage({
+     
+    destination:function(req,file,cb){
+        cb(null,"./uploads/")
+    },
+    filename:function(req,file,cb){
+        cb(null, new Date().toISOString()+file.originalname);
+    }
+
+});
+const fileFilter=(req,file,cb)=>{
+    if(file.mimetype==="image/jpeg"||file.mimetype==="image/png"){
+        cb(null,true);
+    }else{
+        cb(null,false);
+    }
 
 
+};
+const upload=multer({storage:storage,limits:{
+    fieldSize:1024*1024*5
+},fileFilter:fileFilter});
 router.get("/",function (req,res,next) {
   Product.find().
-  select("name price _id")
+  select("name productImage price _id")
   .exec()
   .then(products=>{
      const response={
@@ -15,6 +38,7 @@ router.get("/",function (req,res,next) {
              return{
                  name:doc.name,
                  price:doc.price,
+                 productImage:productImage,
                  _id:doc.id,
                  request:{
                      type:"GET",
@@ -35,12 +59,14 @@ router.get("/",function (req,res,next) {
   
 });
 
-router.post("/",function (req,res,next) {
+router.post("/",upload.single("productImage"), (req,res,next) =>{
+
 
  const product=new Product({
-_id:new mongoose.Types.ObjectId,
+    _id:new mongoose.Types.ObjectId,
     name:req.body.name,
-    price:req.body.price
+    price:req.body.price,
+    productImage:req.file.path
  });
      product.save().then((result)=>{
          console.log(result);
@@ -49,6 +75,7 @@ _id:new mongoose.Types.ObjectId,
             createdProduct:{
                 name:result.name,
                 price:result.price,
+                productImage:result.productImage,
                 _id:result.id,
                 request:{
                     type:"Get",
@@ -85,9 +112,13 @@ router.get("/:productId",function (req,res,next) {
             res.status(404).json({message:"no valid info"});
         }
     })
-    .catch(err=>{
+    .catch(
+        
+        err=>{
         console.log(err);
         res.status(500).json({eror:err});
+
+
     });
 
 
